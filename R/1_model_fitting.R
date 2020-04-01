@@ -16,7 +16,7 @@ compile("Cpp/AR_GARCH_with_covariates.cpp")
 dyn.load(dynlib("Cpp/AR_GARCH_with_covariates"))
 
 # Mean model
-data <- read.table("Data/Svalbard_1975-2019.txt", skip = 40, sep = ";",
+data <- read.table("Data/1_Svalbard_1975-2019.txt", skip = 40, sep = ";",
                    stringsAsFactors = FALSE, header =TRUE)
 data$Date <- as.Date(data$Date, "%d.%m.%Y")
 data <- data[-which(month(data$Date)==2 & mday(data$Date)==29),]

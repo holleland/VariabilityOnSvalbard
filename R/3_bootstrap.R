@@ -1,5 +1,9 @@
+library(doParallel)
+library(plyr)
+library(ggplot2)
 
 if(RUN_BOOT){
+  cores <- detectCores()-1
   # -------------------
   # -- Nonstochastic --
   # -------------------
@@ -27,8 +31,7 @@ if(RUN_BOOT){
   #testrun 
   run.boot.det(1,par=par,Mboot = M,data$Date)
   t1 <- Sys.time()
-  library(doParallel)
-  cl <- makeCluster(7)
+  cl <- makeCluster(cores)
   clusterEvalQ(cl, 
                { library(TMB)
                  library(lubridate)
@@ -39,7 +42,7 @@ if(RUN_BOOT){
   RESULTS <- parSapply(cl=cl,X = 1:10000, FUN = run.boot.det, par = par, Mboot = M, Date = data$Date)
   stopCluster(cl)
   t2 <- Sys.time()
-  t2-t1
+  boot.time.nonstochastic <- t2-t1
   tobs <- RESULTS[2,]/(RESULTS[nrow(RESULTS)/2+2,2])
   plot(density(tobs), xlim = c(-8,4))
   abline(v=quantile(tobs, prob = c(0.025,0.975)), col =2)
@@ -55,12 +58,12 @@ if(RUN_BOOT){
   par[4]<-0
   run.boot.garch <- function(k, par,Mboot, Date){
     n <- nrow(Mboot)
-    sig <- par[1] + Mboot %*% par[-(1:3)]
-    xboot <- numeric(n)
+    xboot <-sig <- numeric(n)
     #xboot[1]<-rnorm(1, sd = sqrt(par[1]/(1-sum(par[2:3]))))
     for(j in 1:n){
       if(j>=2)
-        sig[j] <- sig[j] + par[2] * xboot[j-1]^2 + par[3] * sig[j-1]
+        sig[j] <- (c(1,Mboot[j,]) %*% par[-(2:3)] )*(1-sum(par[2:3]))+
+          par[2] * xboot[j-1]^2 + par[3] * sig[j-1]
       xboot[j] <- rnorm(1, sd = sqrt(sig[j]))
     }
     parameters <- list(
@@ -79,12 +82,11 @@ if(RUN_BOOT){
     return(c(fit_G$par, sqrt(diag(solve(f$he(fit_G$par))))))
   }
   #test-run
-  options(warn=-1)
+  #options(warn=-1)
   run.boot.garch(1, par = par, Mboot = Mtmb, Date = data$Date)
-  options(warn=0)
+  #options(warn=0)
   t1 <- Sys.time()
-  library(doParallel)
-  cl <- makeCluster(7)
+  cl <- makeCluster(cores)
   clusterEvalQ(cl, 
                {library(TMB)
                  library(lubridate)
@@ -95,7 +97,7 @@ if(RUN_BOOT){
   RESULTS.garch <- parSapply(cl=cl,X = 1:10000, FUN = run.boot.garch, par = par, Mboot = Mtmb, Date = data$Date )
   stopCluster(cl)
   t2 <- Sys.time()
-  t2-t1
+  boot.time.garch <- t2-t1
   
   tobs <- RESULTS.garch[4,]/(RESULTS.garch[nrow(RESULTS.garch)/2+4,2])
   plot(density(tobs), xlim = c(-4,4))
@@ -118,18 +120,17 @@ Tobs$x2 <- qnorm(.025) + Tobs$Tobs
 bootres<-data.frame(tobs = c(RESULTS[2,]/RESULTS[10,],
                              RESULTS.garch[4,]/RESULTS.garch[12,]),
                     type = c(rep("Nonstochastic",nrow(RESULTS)),rep("GARCH", nrow(RESULTS.garch))))
-library(plyr)
-quants <- cbind(ddply(bootres, .(type), summarize, quantile = quantile(tobs, prob = c(0.025,0.975))),
-                q = c("2.5%","97.5%","2.5%","97.5%"))
-q2 <- data.frame(type = c("Nonstochastic","GARCH"), x1 =  quants[c(1,3),2], x2 = quants[c(2,4),2]) 
+
+quants <- ddply(bootres, .(type), summarize, q25 = quantile(tobs, .025), q75 = quantile(tobs,.975))
+
+
 ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
-  geom_vline(data = quants[quants$q == "2.5%",], 
-             aes(xintercept =quantile), col = "red", lwd=.8,lty = 2)+
-  geom_vline(data = quants[quants$q == "97.5%",], 
-             aes(xintercept =quantile), col = "red", lwd=.8,lty = 2)+
-  geom_text(data = ddply(quants, .(type), summarize, 
-                         med = quantile[1]+diff(quantile)/2),
-            aes(x=med, y = .48, label = "Bootstrap\n 95% CI"), vjust =.9,
+  geom_vline(data = quants,
+             aes(xintercept =q25), col = "red", lwd=.8,lty = 2)+
+  geom_vline(data = quants,
+             aes(xintercept =q75), col = "red", lwd=.8,lty = 2)+
+  geom_text(data = quants,
+            aes(x=q25+(q75-q25)/2, y = .48, label = "Bootstrap\n 95% CI"), vjust =.9,
             colour = "red", #fontface = "bold",
             size = 5)+
   geom_segment(data = Tobs, aes(x = Tobs, xend =Tobs, 
@@ -141,8 +142,8 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
                 label = lab), 
             vjust = -.25, hjust = 0.5, parse = TRUE,size = 5,
             col = "blue")+
-  geom_segment(data=q2,
-               aes(x=x1, y = .405,xend = x2,yend =.405),size = .6,
+  geom_segment(data=quants,
+               aes(x=q25, y = .405,xend = q75,yend =.405),size = .6,
                arrow = arrow(ends = "both", length = unit(0.1,"inches")), 
                col = "red",
                lty=1)+
@@ -170,8 +171,9 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
                 axis.text = element_text(size = 12),
                 axis.title = element_text(size = 14))+
   facet_wrap(~type, ncol = 2, scales = "fixed", strip.position = "top")
-ggsave("Figures/Bootstrap_kappa_denisty.pdf", width = 8, height = 4)
+ggsave("Figures/8_Bootstrap_kappa_denisty.pdf", width = 8, height = 4)
 
-
-
-
+if(RUN_BOOT){
+cat("The nonstochastic bootstrap took ", boot.time.nonstochastic,"\n")
+cat("The GARCH bootstrap took ", boot.time.garch,"\n")
+}

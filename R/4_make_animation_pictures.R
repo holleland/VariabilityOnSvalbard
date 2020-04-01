@@ -7,7 +7,7 @@ i15 <- which(data$Date == "2019-01-01")
 # Every day of the year: 
 for(j in 0:364){
   df5<-data.frame(Date =  format(as.Date(c("1979-01-01","2019-01-01"))+j, format = "%Y, %b %d"), 
-                  df[c(i80+j,i15+j), 4:7])
+                  data[c(i80+j,i15+j), c("sig","sigTMB","EWMA","rollsd")])
   df3 <- melt(df5, id = "Date")
   names(df3)<-c("Date","type","sig")
   df3$type = mapvalues(df3$type, from = levels(df3$type), to = c("Nonstochastic", "GARCH","EWMA", "MVAR"))
@@ -36,7 +36,7 @@ for(j in 0:43){
   dtemp <- as.Date(c(paste(1976+j,"-02-20",sep = ""),
                paste(1976+j,"-06-05",sep = "")))
   df5<-data.frame(Date = format(as.Date(dtemp), format = "%Y, %b %d"),
-                  df[which(df$Date %in% dtemp), 4:7])
+                  data[which(data$Date %in% dtemp), c("sig","sigTMB","EWMA","rollsd")])
   
   df3 <- melt(df5, id = "Date")
   names(df3)<-c("Date","type","sig")

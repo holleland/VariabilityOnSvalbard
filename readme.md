@@ -9,7 +9,7 @@ Decline in Variability on Svalbard
 
 *The full paper can be found here (link will come).*
 
-This repository contains the necessary code for reproducing results from the paper *Decline in Variability on Svalbard*. To be able run all the code, install the necessary packages by the following code:
+This repository contains the necessary code for reproducing results from the paper *Decline in Variability on Svalbard*. To run all the code, install the necessary packages by the following code:
 
 ``` r
 list.of.packages <- c("TMB", "ggplot2", "zoo", "lubridate", "reshape2",
@@ -20,9 +20,14 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, 
 if(length(new.packages)) install.packages(new.packages)
 ```
 
-The [TMB package](https://github.com/kaskr/adcomp/wiki) requires a C++ compilator. Follow the instructions for [download and installing](https://github.com/kaskr/adcomp/wiki/Download).
+The [TMB package](https://github.com/kaskr/adcomp/wiki) requires a C++ compilator. Follow the instructions for [download and installing TMB](https://github.com/kaskr/adcomp/wiki/Download).
 
 **The bootstrap** takes about an hour to run with seven parallel workers. If not adjusted, the script will use one less than the number of available cores.
+
+Animations
+==========
+
+<img src="Animations/day_by_day.gif" width="400" height="400" /> <img src="Animations/year_by_year.gif" width="400" height="400" />
 
 Data
 ----

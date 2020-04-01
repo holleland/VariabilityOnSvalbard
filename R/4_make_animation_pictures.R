@@ -1,5 +1,6 @@
 Sys.setlocale("LC_TIME", "english") 
 library(plyr)
+library(ggplot2)
 i80 <- which(data$Date == "1979-01-01")
 i15 <- which(data$Date == "2019-01-01")
 

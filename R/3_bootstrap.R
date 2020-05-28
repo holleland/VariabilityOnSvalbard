@@ -123,7 +123,7 @@ bootres<-data.frame(tobs = c(RESULTS[2,]/RESULTS[10,],
 
 quants <- ddply(bootres, .(type), summarize, q25 = quantile(tobs, .025), q75 = quantile(tobs,.975))
 
-
+bootres <- transform(bootres, type = factor(type, levels = c("Nonstochastic", "GARCH")))
 ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
   geom_vline(data = quants,
              aes(xintercept =q25), col = "red", lwd=.8,lty = 2)+

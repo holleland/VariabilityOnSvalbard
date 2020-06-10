@@ -13,43 +13,47 @@ library(ggpubr)
 meantemp <- c(-13.999619, -8.784662)
 dens.df <- data.frame(
   mean = meantemp+c(1,0), 
-  sd = c(4.308112, 2),
+  sd = c(4.308112, 1.3),
   year = c(1976, 2019)
 )
 yend <- dnorm(0,sd = min(dens.df$sd))
-q1 <- qnorm(.975, mean = dens.df$mean[1], sd = dens.df$sd[1])
-q2 <- qnorm(.975, mean = dens.df$mean[2], sd = dens.df$sd[2])
-q12 <- qnorm(.975, mean = dens.df$mean[2], sd = dens.df$sd[1])
-q1a <- qnorm(.025, mean = dens.df$mean[1], sd = dens.df$sd[1])
-q2a <- qnorm(.025, mean = dens.df$mean[2], sd = dens.df$sd[2])
-q12a <- qnorm(.025, mean = dens.df$mean[2], sd = dens.df$sd[1])
+q1 <- qnorm(.95, mean = dens.df$mean[1], sd = dens.df$sd[1])
+q2 <- qnorm(.95, mean = dens.df$mean[2], sd = dens.df$sd[2])
+q12 <- qnorm(.95, mean = dens.df$mean[2], sd = dens.df$sd[1])
+q1a <- qnorm(.05, mean = dens.df$mean[1], sd = dens.df$sd[1])
+q2a <- qnorm(.05, mean = dens.df$mean[2], sd = dens.df$sd[2])
+q12a <- qnorm(.05, mean = dens.df$mean[2], sd = dens.df$sd[1])
 
 
-xl <- -28
-xu <- 5
+xl <- -25
+xu <- 4
 options(warn = -1)
 p1<-ggplot(dens.df)+stat_function(fun = dnorm, xlim = c(xl,xu), args=list(mean = dens.df$mean[1],
                                                                           sd = dens.df$sd[1]), col = "blue")+
   xlim(xl,xu)+mytheme+
   geom_area(stat = "function", fun = dnorm, xlim = c(q1,xu), 
             args=list(mean = dens.df$mean[1],
-                      sd = dens.df$sd[1]), fill = "skyblue", alpha = .3, col = NA, lwd= 0)+
+                      sd = dens.df$sd[1]), fill = "orchid2", alpha = .7, col = NA, lwd= 0)+
   geom_area(stat = "function", fun = dnorm, xlim = c(xl,q1a), 
             args=list(mean = dens.df$mean[1],
-                      sd = dens.df$sd[1]), fill = "skyblue", alpha = .3, col = NA, lwd= 0)+
+                      sd = dens.df$sd[1]), fill = "orchid2", alpha = .7, col = NA, lwd= 0)+
+  #geom_segment(aes(x = q1, xend = q1, y = 0, yend = dnorm(q1,dens.df$mean[1],dens.df$sd[1])),
+  #             col = "blue", size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
+  #geom_segment(aes(x = q1a, xend = q1a, y = 0, yend = dnorm(q1a,dens.df$mean[1],dens.df$sd[1])),
+  #             col = "blue", size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
   xlab("")+ylab("")+
   scale_y_continuous(expand = c(0,0), limits = c(0,yend))+
   theme(axis.line.y = element_blank(), 
         axis.text = element_blank(),
         axis.ticks = element_blank())+
-  geom_vline(aes(xintercept = dens.df$mean[1]), col = "blue", lty = 2)#+
+  geom_vline(aes(xintercept = dens.df$mean[1]), col = "brown1", lty = 2)+
+  geom_vline(aes(xintercept = q1), lty = 2, col = "darkblue")+
+  geom_vline(aes(xintercept = q1a), lty = 2, col = "darkblue")
 
-
+p1
 p2<-ggplot(dens.df)+
-  geom_segment(aes(x = q12, xend = q12, y = 0, yend = dnorm(q12,dens.df$mean[2],dens.df$sd[1])),
-               col = "blue", lty = 1)+
-  geom_segment(aes(x = q12a, xend = q12a, y = 0, yend = dnorm(q12a,dens.df$mean[2],dens.df$sd[1])),
-               col = "blue", lty = 1)+
   stat_function(fun = dnorm, xlim = c(xl,xu), args=list(mean = dens.df$mean[2],
                                                         sd = dens.df$sd[1]), col = "blue")+
   #stat_function(fun = dnorm, xlim = c(q12,xu), args=list(mean = dens.df$mean[2],
@@ -57,49 +61,68 @@ p2<-ggplot(dens.df)+
   #  stat_function(fun = dnorm, xlim = c(xl,xu), args=list(mean = dens.df$mean[2],
   #                                                        sd = dens.df$sd[1]), col = "green")+
   xlim(xl,xu)+mytheme+
-  geom_area(stat = "function", fun = dnorm, xlim = c(q1,xu), 
+  geom_area(stat = "function", fun = dnorm, xlim = c(q12,xu), 
             args=list(mean = dens.df$mean[2],
-                      sd = dens.df$sd[1]), fill = "skyblue", alpha = .3, col = NA, lwd= 0)+
-  geom_area(stat = "function", fun = dnorm, xlim = c(xl,q1a), 
+                      sd = dens.df$sd[1]), fill = "orchid2", alpha = .7, col = NA, lwd= 0)+
+  geom_area(stat = "function", fun = dnorm, xlim = c(xl,q12a), 
             args=list(mean = dens.df$mean[2],
-                      sd = dens.df$sd[1]), fill = "skyblue", alpha = .3, col = NA, lwd= 0)+
+                      sd = dens.df$sd[1]), fill = "orchid2", alpha = .7, col = NA, lwd= 0)+
+  #geom_segment(aes(x = q12, xend = q12, y = 0, yend = dnorm(q12,dens.df$mean[2],dens.df$sd[1])),
+  #             col = "blue", lty = 1, size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
+  #geom_segment(aes(x = q12a, xend = q12a, y = 0, yend = dnorm(q12a,dens.df$mean[2],dens.df$sd[1])),
+  #             col = "blue", lty = 1, size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
+  
   xlab("")+ylab("")+
   scale_y_continuous(expand = c(0,0), limits = c(0,yend))+
   theme(axis.line.y = element_blank(), 
         axis.text = element_blank(),
         axis.ticks = element_blank())+
-  geom_vline(aes(xintercept = dens.df$mean[1]), col = "blue", lty = 2)+
-  geom_vline(aes(xintercept = dens.df$mean[2]), col = "blue", lty = 2)+
+  geom_vline(aes(xintercept = dens.df$mean[1]), col = "brown1", lty = 2)+
+  geom_vline(aes(xintercept = dens.df$mean[2]), col = "brown1", lty = 2)+
   geom_segment(aes(x = dens.df$mean[1], xend = dens.df$mean[2],
                    y = yend*.65, yend = yend*.65), arrow = arrow(ends = "last", length = unit(.1, "inches")),
                col = "red", lty = 1, size = .3)+
   geom_label(aes(x = dens.df$mean[1]-diff(dens.df$mean)/2-1, y = yend*.65, label = "Change\nin mean"), 
-             fill = NA, col = "red", label.size = 0, size = 3)
-
+             fill = NA, col = "red", label.size = 0, size = 3)+
+  geom_vline(aes(xintercept = q1), lty = 2, col = "darkblue")+
+  geom_vline(aes(xintercept = q1a), lty = 2, col = "darkblue")
+p2
 p3<-ggplot(dens.df)+
-  geom_segment(aes(x = q2, xend = q2, y = 0, yend = dnorm(q2,dens.df$mean[2],dens.df$sd[2])),
-               col = "blue", lty = 1)+
-  geom_segment(aes(x = q2a, xend = q2a, y = 0, yend = dnorm(q2a,dens.df$mean[2],dens.df$sd[2])),
-               col = "blue", lty = 1)+
   stat_function(fun = dnorm, xlim = c(xl,xu), args=list(mean = dens.df$mean[2],
                                                         sd = dens.df$sd[2]), col = "blue")+
+
+  
   xlim(xl,xu)+mytheme+
-  geom_area(stat = "function", fun = dnorm, xlim = c(q1,xu), 
+  geom_area(stat = "function", fun = dnorm, xlim = c(q2,xu), 
             args=list(mean = dens.df$mean[2],
-                      sd = dens.df$sd[2]), fill = "skyblue", alpha = .3, col = "skyblue", lwd= 0)+
+                      sd = dens.df$sd[2]), fill = "orchid2", alpha = .7,lwd= 0)+
+  geom_area(stat = "function", fun = dnorm, xlim = c(xl,q2a), 
+             args=list(mean = dens.df$mean[2],
+                       sd = dens.df$sd[2]), fill = "orchid2", alpha = .7,lwd= 0)+
   xlab("")+ylab("")+
+  #geom_segment(aes(x = q2, xend = q2, y = 0, yend = dnorm(q2,dens.df$mean[2],dens.df$sd[2])),
+  #             col = "blue", size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
+  #geom_segment(aes(x = q2a, xend = q2a, y = 0, yend = dnorm(q2a,dens.df$mean[2],dens.df$sd[2])),
+  #             col = "blue", size = .6,
+  #             arrow = arrow(ends = "first", length = unit(.1, "inches")))+
+  
   scale_y_continuous(expand = c(0,0), limits = c(0,yend))+
   theme(axis.line.y = element_blank(), 
         axis.text = element_blank(),
         axis.ticks = element_blank())+
-  geom_vline(aes(xintercept = dens.df$mean[1]), col = "blue", lty = 2)+
-  geom_vline(aes(xintercept = dens.df$mean[2]), col = "blue", lty = 2)+
+  geom_vline(aes(xintercept = dens.df$mean[1]), col = "brown1", lty = 2)+
+  geom_vline(aes(xintercept = dens.df$mean[2]), col = "brown1", lty = 2)+
   geom_segment(aes(x = dens.df$mean[1], xend = dens.df$mean[2],
                    y = yend*.65, yend = yend*.65), arrow = arrow(ends = "last", length = unit(.1, "inches")),
                col = "red", lty = 1, size = .3)+
   geom_label(aes(x = dens.df$mean[1]-diff(dens.df$mean)/2-1, y = yend*.65, label = "Change\nin mean"), 
-             fill = NA, col = "red", label.size = 0, size = 3)
-
+             fill = NA, col = "red", label.size = 0, size = 3)+
+  geom_vline(aes(xintercept = q1), lty = 2, col = "darkblue")+
+  geom_vline(aes(xintercept = q1a), lty = 2, col = "darkblue")
+p3
 figure <- ggarrange(p1, p2, p3, 
                     labels = c("A", "B", "C"),
                     ncol = 1, nrow = 3, hjust = -3,
@@ -111,7 +134,7 @@ figure <- annotate_figure(figure,
 )
 figure
 ggsave(filename = "Figures/1_distribution_change.pdf", 
-       width = 4, height = 4.5)
+       width = 4, height = 6)
 
 # ------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------
@@ -177,7 +200,6 @@ options(warn=-1) # To ignore warnings of plotting missing values:
 missdates <- seq(as.Date("1970-01-01"),as.Date("1975-12-31"),1)
 missdates <- missdates[-which(mday(missdates)==29 & month(missdates)==2)]
 df <- data.frame(Date = c(missdates, data$Date), 
-                 diff = c(rep(NA,length(missdates)), data$diff),
                  temp = c(rep(NA,length(missdates)),data$TAM),
                  rollsd = c(rep(NA,length(missdates)),data$rollsd),
                  sig = c(rep(NA,length(missdates)), data$sig),
@@ -251,41 +273,6 @@ ggsave("Figures/5_Mean_model_residual_series_by_decade.pdf",
 
 
 
-# --------------
-# -- Barplots --
-# --------------
-Sys.setlocale("LC_TIME", "english") 
-
-datesx4 <- as.Date(c("1979-02-20","1979-06-05","2019-02-20","2019-06-05"))
-df5<-data.frame(Date = datesx4,
-                sig = NA, sigTMB = NA, EWMA =NA, rollsd = NA) 
-for(i in 1:4){
-  df5[i,2] <- df$sig[df$Date == df5$Date[i]]
-  df5[i,3] <- df$sigTMB[df$Date == df5$Date[i]]
-  df5[i,5] <- df$rollsd[df$Date == df5$Date[i]]
-  df5[i,4] <- df$EWMA[df$Date == df5$Date[i]]
-}
-df3 <- melt(df5, id = "Date")
-names(df3)<-c("Date","type","sig")
-df3$type = mapvalues(df3$type, from = levels(df3$type), to = c("Nonstochastic", "GARCH","EWMA", "MVAR"))
-df3$sig <- df3$sig^2
-df3$Date <- factor(format(df3$Date, format = "%Y, %b %d"))
-df3$Date <- factor(df3$Date, levels = levels(df3$Date)[c(1,3,2,4)])
-ggplot(df3, aes(x=type, y = sig))+
-  geom_col(aes(group = Date, fill = factor(Date)),position = "dodge")+
-  scale_fill_manual(values = c("skyblue", "blue", "darkorchid1","darkorchid4"),name = "" )+mytheme+
-  scale_x_discrete(expand = c(0,0))+
-  scale_y_continuous(expand = c(0,0), limits = c(0, 38))+ylab("Variance")+
-  xlab("")+
-  theme(legend.position = "top",
-        legend.text = element_text(size = 14),
-        axis.text = element_text(size = 14),
-        axis.ticks.x = element_blank())+
-  geom_text(aes(group = Date, col = factor(Date), label = round(sig,2), y = sig),vjust = -.25,position =position_dodge(width = .9),
-            size = 4,
-            fontface = "bold")+
-  scale_colour_manual(values = c("skyblue", "blue", "darkorchid1","darkorchid4"),name = "" )
-ggsave("Figures/11_Barplots_of_variances.pdf", width = 8, height = 4)
 
 # ------------------------------
 # -- Residuals analysis plots --
@@ -296,19 +283,59 @@ ggsave("Figures/11_Barplots_of_variances.pdf", width = 8, height = 4)
 df.Z <- data.frame(
   Z = rep(data$x,4)/c(data$sig,data$sigTMB, data$rollsd, data$EWMA),
   type = factor(rep(c("Nonstochastic", "GARCH", "MVAR", "EWMA"), each = length(data$x)))
-)
+  )
+MVAR.df <- MASS::fitdistr(df.Z$Z[df.Z$type=="MVAR"], fGarch::dstd, start = list(nu = 10), sd = 1, mean = 0,lower = 2.1)$estimate
+EWMA.df <- MASS::fitdistr(df.Z$Z[df.Z$type=="EWMA"], fGarch::dstd, start = list(nu = 10), sd = 1, mean = 0,lower = 2.1)$estimate
+df.Z$df = rep(c(fit$par[1], fitG$par[1], MVAR.df, EWMA.df), each = length(x))
 df.Z <- transform(df.Z, type = factor(type, levels = c("Nonstochastic", "GARCH", "MVAR", "EWMA")))
-(z1<-ggplot(df.Z, aes(sample = Z))+
-  geom_qq(col = "skyblue", cex = .5)+
-  geom_qq_line(col = "red", lwd = .6, lty = 2)+
-  facet_wrap(~type, ncol = 4)+mytheme+xlab("")+ylab("Sample")+
+
+
+z1a<-ggplot(df.Z[df.Z$type == "Nonstochastic", ], aes(sample = Z))+
+  geom_qq(col = "skyblue", cex = .5, distribution = fGarch::qstd, dparams =list(nu=fit$par[1]))+
+  geom_qq_line(col = "red", lwd = .6, lty = 2, distribution = fGarch::qstd, dparams =list(nu=fit$par[1]))+
+  mytheme + xlab(bquote(nu == .(round(fit$par[1],2))))+ylab("Sample")+
+  facet_wrap( ~type)+
   theme(strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
-        strip.text = element_text(size = 14, colour = "white")))#+
-#xlim(-6,6)
-#scale_x_continuous(expand = c(0,0))+
-#scale_y_continuous(expand = c(0,0))
-ggsave("Figures/10a_Z_qqnorm_by_method.pdf",
-       width = 8, height = 2.6)
+        strip.text = element_text(size = 14, colour = "white"), 
+        plot.margin = margin(l = .8, unit = "cm"))
+z1b<-ggplot(df.Z[df.Z$type == "GARCH", ], aes(sample = Z))+
+  geom_qq(col = "skyblue", cex = .5, distribution = fGarch::qstd, dparams =list(nu=fitG$par[1]))+
+  geom_qq_line(col = "red", lwd = .6, lty = 2, distribution = fGarch::qstd, dparams =list(nu=fitG$par[1]))+
+  mytheme +xlab(bquote(nu == .(round(fitG$par[1],2))))+ylab("")+
+  facet_wrap( ~type)+
+  theme(strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
+        strip.text = element_text(size = 14, colour = "white"),
+        axis.title.y = element_blank(),
+        plot.margin = margin())
+
+z1c<-ggplot(df.Z[df.Z$type == "MVAR", ], aes(sample = Z))+
+  geom_qq(col = "skyblue", cex = .5, distribution = fGarch::qstd, dparams =list(nu=MVAR.df))+
+  geom_qq_line(col = "red", lwd = .6, lty = 2, distribution = fGarch::qstd, dparams =list(nu=MVAR.df))+
+  mytheme +xlab(bquote(nu == .(round(MVAR.df,2))))+ylab("")+
+  facet_wrap( ~type)+
+  scale_x_continuous(breaks = seq(-6,6,3))+
+  scale_y_continuous(breaks = seq(-6,6,3))+
+  theme(strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
+        strip.text = element_text(size = 14, colour = "white"),
+        axis.title.y = element_blank(),
+        plot.margin = margin())
+
+z1d<-ggplot(df.Z[df.Z$type == "EWMA", ], aes(sample = Z))+
+  geom_qq(col = "skyblue", cex = .5, distribution = fGarch::qstd, dparams =list(nu=EWMA.df))+
+  geom_qq_line(col = "red", lwd = .6, lty = 2, distribution = fGarch::qstd, dparams =list(nu=EWMA.df))+
+  mytheme + xlab(bquote(nu == .(round(EWMA.df,2))))+ylab("")+
+  scale_x_continuous(breaks = seq(-6,6,3))+
+  scale_y_continuous(breaks = seq(-6,6,3))+
+  #xlab(expression(paste(plain(sin) * phi, "  and  ",
+  #                      plain(cos) * phi)))
+  facet_wrap( ~type)+
+  theme(strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
+        strip.text = element_text(size = 14, colour = "white"),axis.title.y = element_blank(),
+        plot.margin = margin())
+
+
+(z1<-ggarrange(z1a,z1b,z1c,z1d, ncol = 4, widths = c(1.3, 1,1,1)))
+#ggsave("Figures/10a_Z_qqnorm_by_method.pdf",   width = 8, height = 2.6)
 
 
 #
@@ -331,8 +358,7 @@ acf.df <- transform(acf.df, type = factor(type, levels = c("Nonstochastic", "GAR
   theme(strip.background = element_blank(),#element_rect(fill = "skyblue", colour = "skyblue"),
         strip.text = element_blank())+#element_text(size = 12, colour = "white"))+
   facet_wrap( ~type, ncol = 4))
-ggsave("Figures/10b_Z_acf_by_method.pdf",
-       width = 8, height = 2.4)
+#ggsave("Figures/10b_Z_acf_by_method.pdf",       width = 8, height = 2.4)
 
 #
 # 3. ACF of Z squared
@@ -345,28 +371,44 @@ acf.df <- data.frame(ACF = c(acf(df.Z$Z[df.Z$type == "Nonstochastic"]^2, lag.max
                      type = rep(c("Nonstochastic","GARCH","MVAR","EWMA"),each = 401))
 acf.df <- transform(acf.df, type = factor(type, levels = c("Nonstochastic", "GARCH", "MVAR", "EWMA")))
 
-(z3<-ggplot(acf.df[acf.df$lag !=0,], aes(y = ACF, x = lag))+geom_line(col = "skyblue")+
+(z3<-ggplot(acf.df[acf.df$lag !=0,], aes(y = ACF, x = lag))+
+    geom_line(col = "skyblue")+
   #geom_segment(aes(xend = lag, yend = 0))+
   geom_hline(aes(yintercept=0))+
   geom_hline(aes(yintercept = qnorm(.975)/sqrt(length(data$x))), col = "blue", lty = 2)+
   geom_hline(aes(yintercept =-qnorm(.975)/sqrt(length(data$x))), col = "blue", lty = 2)+
   geom_hline(aes(yintercept = qnorm(1-.025/400)/sqrt(length(data$x))), col = "green", lty = 2)+
   geom_hline(aes(yintercept =-qnorm(1-.025/400)/sqrt(length(data$x))), col = "green", lty = 2)+
+    scale_y_continuous(breaks = seq(-0.06,0.06,0.02))+
   mytheme+xlab("Lag")+ylab(expression(ACF~(Z^2)))+
   theme(strip.background = element_blank(),#element_rect(fill = "skyblue", colour = "skyblue"),
-        strip.text = element_blank())+#element_text(size = 12, colour = "white"))+
-  facet_wrap( ~type, ncol = 4))
-ggsave("Figures/10c_Z2_acf_by_method.pdf",
-       width = 8, height = 2.4)
-#ggpubr::ggarrange(z1,z2,z3,ncol = 1)
+        strip.text = element_blank(),
+        strip.placement = "outside")+
+        #axis.title.x = element_text(vjust = 8))+#element_text(size = 12, colour = "white"))+
+  facet_wrap( ~type, ncol = 4, strip.position = "bottom"))
+#ggsave("Figures/10c_Z2_acf_by_method.pdf",   width = 8, height = 2.4)
+z1<-ggarrange(z1a,z1b,z1c,z1d, ncol = 4, widths = c(1.3, 1,1,1))
+ggarrange(z1,z2,z3,ncol = 1,
+                  align = "v", labels = c("A","B","C"))
+
+ggsave("Figures/10_Z_acf_by_method.pdf",
+       width = 8, height = 3*2.4)
 #
 # 4. Coverage table
 #
-L <- cbind(aggregate(df.Z$Z, list(df.Z$type), function(k)mean(abs(k)<=qnorm(1-0.05/2))),
-           aggregate(df.Z$Z, list(df.Z$type), function(k)mean(dnorm(k, log = TRUE)))$x)
+L <- cbind(aggregate(df.Z$Z, list(df.Z$type), function(k)mean(abs(k)<=qnorm(p=1-0.05/2))),
+           aggregate(df.Z$Z, list(df.Z$type), function(k)mean(dnorm(x=k, log = TRUE)))$x)
+
+Lt <- c(length(which(abs(df.Z$Z[df.Z$type == "Nonstochastic"])<fGarch::qstd(.975, nu = fit$par[1])))/length(data$x),
+        length(which(abs(df.Z$Z[df.Z$type == "GARCH"])<fGarch::qstd(.975, nu = fitG$par[1])))/length(data$x),
+        length(which(abs(df.Z$Z[df.Z$type == "MVAR"])<fGarch::qstd(.975, nu = MVAR.df)))/length(data$x),
+        length(which(abs(df.Z$Z[df.Z$type == "EWMA"])<fGarch::qstd(.975, nu = EWMA.df)))/length(data$x))
+
+
 names(L)<- c("Model", "Cover", "L/n")
 L$Cover <- paste(round(L$Cover*100, 1),"\\%",sep="")
 L$"L/n" <- round(L$"L/n", 3)
+L <- L[c(4,2,3,1),]
 print(xtable(t(L), digits = 2),
       file = "Tex/10d_Coverage_table.tex",
       sanitize.text.function = function(k)k,
@@ -374,7 +416,7 @@ print(xtable(t(L), digits = 2),
 
 
 # ------------------------------------------------------ 
-# -- Empirical standard devations by year and month : --
+# -- Empirical variance by year and month : --
 # ------------------------------------------------------
 Sys.setlocale("LC_TIME", "english") 
 sd.df <- data.frame(
@@ -382,33 +424,32 @@ sd.df <- data.frame(
   mth = month(data$Date, abbr = FALSE, label = TRUE),
   year = year(data$Date)
   )
-year.and.month <- ddply(sd.df, .(mth, year), summarize, sd=sd(x))
-ggplot(year.and.month, aes(x = year, y = sd))+geom_line(col = "skyblue")+
+year.and.month <- ddply(sd.df, .(mth, year), summarize, Var=var(x))
+summary(lm(Var~year, year.and.month[year.and.month$mth == "May",]))
+summary(lm(Var~year, year.and.month[year.and.month$mth == "June",]))
+summary(lm(Var~year, year.and.month[year.and.month$mth == "July",]))
+summary(lm(Var~year, year.and.month[year.and.month$mth == "August",]))
+summary(lm(Var~year, year.and.month[year.and.month$mth == "September",]))
+
+ggplot(year.and.month, aes(x = year, y = Var))+geom_line(col = "skyblue")+
   facet_wrap(~mth, ncol = 3)+geom_smooth(method='lm', formula= y~x, se=FALSE, col = "red", lwd = .4)+
   mytheme+theme(strip.background = element_rect(fill = "skyblue", color = "skyblue"),
                 strip.text = element_text(color = "white", size = 12))+
-  xlab("Year")+ylab("Standard deviation")
+  xlab("Year")+ylab("Variance")
 
-ggsave("Figures/6_standard_deviation_by_year_and_month.pdf", width = 8, height = 6)
+ggsave("Figures/6_variance_by_year_and_month.pdf", width = 8, height = 6)
 
-# -------------------------------------------
-# -- Empirical standard devations by year: --
-# -------------------------------------------
-only.year <- ddply(sd.df, .(year), summarize, sd=sd(x))
-lm.year<-lm(formula = sd~year, data = only.year)$coef
-ggplot(only.year, aes(x = year, y = sd))+geom_point(col = "skyblue")+
-  #facet_wrap(~mth, ncol = 3)+
+# ---------------------------------
+# -- Empirical Variance by year: --
+# ---------------------------------
+only.year <- ddply(sd.df, .(year), summarize, Var=var(x))
+lm.year<-lm(formula = Var~year, data = only.year)$coef
+ggplot(only.year, aes(x = year, y = Var))+geom_point(col = "skyblue")+
   geom_abline(aes(intercept= lm.year[1], slope = lm.year[2]), lwd =.5, col = 2)+
-  #stat_smooth(method='lm', formula= y~x, 
-              #se=FALSE, col = "red", lwd = .4,
-              #fullrange=TRUE)+
   mytheme+theme(axis.text= element_text(size = 12))+
-  xlab("Time")+ylab("Standard deviation")
+  xlab("Time")+ylab("Variance")
 
-ggsave("Figures/7_standard_deviation_by_year.pdf", width = 6, height = 2.5)
+ggsave("Figures/7_variance_by_year.pdf", width = 6, height = 2.5)
 
 options(warn = 0)
-
-
-
 

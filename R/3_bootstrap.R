@@ -2,18 +2,20 @@ library(doParallel)
 library(plyr)
 library(ggplot2)
 
+
 if(RUN_BOOT){
   cores <- detectCores()-1
   # -------------------
   # -- Nonstochastic --
   # -------------------
   par <- fit$par
-  par[2] <- 0
+  par[3] <- 0
   
   
   run.boot.det <- function(k, par,Mboot, Date){
-    xboot <- rnorm(nrow(Mboot), sd =sqrt(Mboot%*%par))
+    xboot <- fGarch::rstd(nrow(Mboot), sd =sqrt(Mboot%*%par[-1]), nu = par[1])
     parameters <- list(
+      v = 10,
       omega = var(xboot),
       alpha = 0,
       beta = 0,
@@ -23,31 +25,32 @@ if(RUN_BOOT){
                   parameters=parameters, silent =TRUE, map = list(alpha = factor(NA), 
                                                                   beta = factor(NA)))
     fit <- nlminb(f$par,f$fn,f$gr, f$he, 
-                  lower = c(#rep(1e-8, length(which(names(f$par) %in% c("omega","alpha", "beta")))), 
+                  lower = c(2.5,#rep(1e-8, length(which(names(f$par) %in% c("omega","alpha", "beta")))), 
                     c(1e-8,rep(-5, ncol(Mboot)-1))),
     )
     return(c(fit$par, sqrt(diag(solve(f$he(fit$par))))))
   }
   #testrun 
-  run.boot.det(1,par=par,Mboot = M,data$Date)
+  run.boot.det(1,par=par,Mboot = cbind(1,M),data$Date)
   t1 <- Sys.time()
   cl <- makeCluster(cores)
   clusterEvalQ(cl, 
                { library(TMB)
                  library(lubridate)
-                 # compile("Cpp/AR_GARCH_with_covariates")
-                 dyn.load(dynlib("Cpp/AR_GARCH_with_covariates"))
+                 dyn.load(dynlib("Cpp/t_GARCH_with_covariates"))
                }
   )
-  RESULTS <- parSapply(cl=cl,X = 1:10000, FUN = run.boot.det, par = par, Mboot = M, Date = data$Date)
+  RESULTS <- parSapply(cl=cl,X = 1:10000, FUN = run.boot.det, par = par, Mboot = cbind(1,M), Date = data$Date)
   stopCluster(cl)
   t2 <- Sys.time()
+  
   boot.time.nonstochastic <- t2-t1
   tobs <- RESULTS[2,]/(RESULTS[nrow(RESULTS)/2+2,2])
   plot(density(tobs), xlim = c(-8,4))
   abline(v=quantile(tobs, prob = c(0.025,0.975)), col =2)
   abline(v=resmat[2,1]/resmat[2,2], col = 4)
-  save(RESULTS, file = "Bootstrap_results/Result of 10000 repeated samples from nonstochastic model with kappa 0.RData")
+  save(RESULTS, 
+       file = "Bootstrap_and_MC_results/Bootstrap_estimation_results_from_10000_repeated_samples_from_nonstochastic_model_with_kappa_0.RData")
   
   
   
@@ -55,18 +58,19 @@ if(RUN_BOOT){
   # -- GARCH MODEL --
   # -----------------
   par <- fitG$par
-  par[4]<-0
+  par[5]<-0
   run.boot.garch <- function(k, par,Mboot, Date){
     n <- nrow(Mboot)
     xboot <-sig <- numeric(n)
     #xboot[1]<-rnorm(1, sd = sqrt(par[1]/(1-sum(par[2:3]))))
     for(j in 1:n){
       if(j>=2)
-        sig[j] <- (c(1,Mboot[j,]) %*% par[-(2:3)] )*(1-sum(par[2:3]))+
-          par[2] * xboot[j-1]^2 + par[3] * sig[j-1]
-      xboot[j] <- rnorm(1, sd = sqrt(sig[j]))
+        sig[j] <- (c(1,Mboot[j,]) %*% par[-c(1,3:4)] )*(1-sum(par[3:4]))+
+          par[3] * xboot[j-1]^2 + par[4] * sig[j-1]
+      xboot[j] <- fGarch::rstd(1, sd = sqrt(sig[j]), nu = par[1])
     }
     parameters <- list(
+      v=10,
       omega = var(xboot),
       alpha = 5e-2,
       beta  = 0.86,
@@ -76,7 +80,7 @@ if(RUN_BOOT){
                             init = sd(xboot[which(mday(Date)==1 & month(Date)==1)])),
                   parameters=parameters, silent =TRUE)
     fit_G <- nlminb(f$par,f$fn,f$gr, f$he, 
-                   lower = c(rep(1e-8, length(which(names(f$par) %in% c("omega","alpha", "beta")))), 
+                   lower = c(2.5,rep(1e-8, length(which(names(f$par) %in% c("omega","alpha", "beta")))), 
                              rep(-100, length(which(names(f$par) %in% c("theta")))))
     )
     return(c(fit_G$par, sqrt(diag(solve(f$he(fit_G$par))))))
@@ -89,9 +93,8 @@ if(RUN_BOOT){
   cl <- makeCluster(cores)
   clusterEvalQ(cl, 
                {library(TMB)
-                 library(lubridate)
-                 # compile("Cpp/AR_GARCH_with_covariates.Cpp")
-                 dyn.load(dynlib("Cpp/AR_GARCH_with_covariates"))
+                library(lubridate)
+                dyn.load(dynlib("Cpp/t_GARCH_with_covariates"))
                }
   )
   RESULTS.garch <- parSapply(cl=cl,X = 1:10000, FUN = run.boot.garch, par = par, Mboot = Mtmb, Date = data$Date )
@@ -99,27 +102,28 @@ if(RUN_BOOT){
   t2 <- Sys.time()
   boot.time.garch <- t2-t1
   
-  tobs <- RESULTS.garch[4,]/(RESULTS.garch[nrow(RESULTS.garch)/2+4,2])
+  tobs <- RESULTS.garch[5,]/(RESULTS.garch[nrow(RESULTS.garch)/2+5,])
   plot(density(tobs), xlim = c(-4,4))
   abline(v=quantile(tobs, prob = c(0.025,0.975)), col =2)
   abline(v=resTMB[4,1]/resTMB[4,2], col = 4)
-  save(RESULTS.garch, file = "Bootstrap_results/Result of 10000 repeated samples from GARCH model with kappa 0.RData")
+  save(RESULTS.garch, 
+       file = "Bootstrap_and_MC_results/Bootstrap_estimation_results_from_10000_repeated_samples_from_GARCH_model_with_kappa_0.RData")
 }
 # -----------------------
 # -- Plotting results: --
 # -----------------------
-load(file = "Bootstrap_results/Result of 10000 repeated samples from nonstochastic model with kappa 0.RData")
-load(file = "Bootstrap_results/Result of 10000 repeated samples from GARCH model with kappa 0.RData")
-Tobs <- data.frame(Tobs = c(resmat[2,1]/resmat[2,2], resTMB[4,1]/resTMB[4,2]),
+load(file = "Bootstrap_and_MC_results/Bootstrap_estimation_results_from_10000_repeated_samples_from_nonstochastic_model_with_kappa_0.RData")
+load(file = "Bootstrap_and_MC_results/Bootstrap_estimation_results_from_10000_repeated_samples_from_GARCH_model_with_kappa_0.RData")
+Tobs <- data.frame(Tobs = c(resmat[3,1]/resmat[3,2], resTMB[5,1]/resTMB[5,2]),
                    type = c("Nonstochastic", "GARCH"),
                    lab = c("frac(widehat(kappa),sde(widehat(kappa)))",
                            "frac(widehat(kappa),sde(widehat(kappa)))"))
 Tobs$x1 <- qnorm(.975) + Tobs$Tobs  
 Tobs$x2 <- qnorm(.025) + Tobs$Tobs  
 
-bootres<-data.frame(tobs = c(RESULTS[2,]/RESULTS[10,],
-                             RESULTS.garch[4,]/RESULTS.garch[12,]),
-                    type = c(rep("Nonstochastic",nrow(RESULTS)),rep("GARCH", nrow(RESULTS.garch))))
+bootres<-data.frame(tobs = c(RESULTS[3,]/RESULTS[nrow(RESULTS)/2+3,],
+                             RESULTS.garch[5,]/RESULTS.garch[nrow(RESULTS.garch)/2+5,]),
+                    type = c(rep("Nonstochastic",ncol(RESULTS)),rep("GARCH", ncol(RESULTS.garch))))
 
 quants <- ddply(bootres, .(type), summarize, q25 = quantile(tobs, .025), q75 = quantile(tobs,.975))
 
@@ -147,7 +151,7 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
                arrow = arrow(ends = "both", length = unit(0.1,"inches")), 
                col = "red",
                lty=1)+
-  scale_x_continuous(expand = c(0,1),# limits = c(-8,5), 
+  scale_x_continuous(expand = c(0,1), labels = seq(-10,5,2.5),breaks =   seq(-10,5,2.5),
                      name = expression(widehat(kappa)/sde(widehat(kappa))))+
   scale_y_continuous(expand = c(0,0), limits = c(0,.5),
                      name = "Density")+

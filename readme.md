@@ -50,10 +50,12 @@ prerun results.
 
 ## Animations
 
-Animations for the unconditional variance included as supplementary
-material to the paper, with the distribution of the regression model
-residuals for every day of the years 1979 and 2019 and for every year
-between 1976 and 2019 on February 20 and June 5.
+Animations using the unconditional variances are included as
+supplementary material to the paper. These are the distribution of the
+regression model residuals for every day of the years 1979 and 2019 and
+for every year between 1976 and 2019 on February 20 and June 5. The
+parametric form is a t-distribution with respectively 9.18 and 10.34
+degrees of freedom for the nonstochastic and GARCH model, respectively.
 
 <img src="Animations/day_by_day.gif" width="400" height="400" />
 <img src="Animations/year_by_year.gif" width="400" height="400" />

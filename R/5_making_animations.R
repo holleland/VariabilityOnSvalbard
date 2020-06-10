@@ -63,7 +63,7 @@ for(j in 1:44){
     mytheme+
     scale_color_manual(values = c( "blue","brown1","darkorchid4"),name = "")+
     scale_y_continuous(limits = c(0,.45), breaks = seq(0,.5,0.1))+
-    xlab("")+ylab("Conditional Density")+
+    xlab("")+ylab("Density")+
     
     theme(legend.position = "bottom",
           strip.placement = "outside",

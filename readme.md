@@ -30,10 +30,8 @@ folder and tables in .tex format in the *Tex* folder. In the folder
 containing the results from the bootstrap and Monte Carlo used in the
 paper. However, if you run your own, these will be replaced. More on
 this below. The *Animations* folder will be filled up with .png files
-when running the *R/5\_making\_animations.R* script, but to make the
-animations from this, you can use the included
-*Animations/making\_gif.bat* file if your operating system is MS
-Windows. The bat-script uses the ffmpeg software.
+when running the *R/5\_making\_animations.R* script, but to make the gif
+files, I use the ffmpeg software for MS Windows.
 
 The likelihood for the parametric volatility is implmented using the
 [TMB package](https://github.com/kaskr/adcomp/wiki), which requires a

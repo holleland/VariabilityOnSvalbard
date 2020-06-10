@@ -57,8 +57,8 @@ for every year between 1976 and 2019 on February 20 and June 5. The
 parametric form is a t-distribution with respectively 9.18 and 10.34
 degrees of freedom for the nonstochastic and GARCH model, respectively.
 
-<img src="Animations/day_by_day.gif" width="400" height="400" />
-<img src="Animations/year_by_year.gif" width="400" height="400" />
+<img src="Animations/day_by_day.gif" width="600" height="400" />
+<img src="Animations/year_by_year.gif" width="600" height="400" />
 
 ## Data
 

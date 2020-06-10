@@ -134,7 +134,7 @@ figure <- annotate_figure(figure,
 )
 figure
 ggsave(filename = "Figures/1_distribution_change.pdf", 
-       width = 4, height = 6)
+       width = 4, height = 4)
 
 # ------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------

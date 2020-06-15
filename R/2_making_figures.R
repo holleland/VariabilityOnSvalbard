@@ -475,7 +475,8 @@ kappa.df <- data.frame(
 )
 
 ggplot(kappa.df, aes(x = date, y = kappa))+
-  geom_line(aes(col = type))+
+  geom_hline(aes(yintercept = 0), lty = 2, col = "grey80")+
+    geom_line(aes(col = type))+
   scale_color_manual(values = c("brown1", "blue", "grey50"))+mytheme+
   scale_x_date(breaks = "months",date_labels = "%b", name ="")+
   ylab(expression(kappa[t]))+
@@ -483,6 +484,7 @@ ggplot(kappa.df, aes(x = date, y = kappa))+
         legend.title = element_blank())+
   geom_vline(aes(xintercept = as.Date("1979-08-24")), lty =2)+
   geom_vline(aes(xintercept = as.Date("1979-02-22")), lty =2)
+  
 ggsave("Figures/7_kappa_of_t.pdf", width = 6, height = 3)
 
 

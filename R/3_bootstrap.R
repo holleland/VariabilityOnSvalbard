@@ -139,7 +139,7 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
   geom_text(data = quants,
             aes(x=q25+(q75-q25)/2, y = .52, label = "Bootstrap\n 95% CI"), vjust =.9,
             colour = "red", #fontface = "bold",
-            size = 5)+
+            size = 4.5)+
   geom_segment(data = Tobs, aes(x = Tobs, xend =Tobs, 
                                 y = .2, yend = 0), 
                col = 4, lwd = .6, lty=1,
@@ -165,7 +165,7 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
   geom_text(data = Tobs,
             aes(x= Tobs, y = .38, label = "Gaussian\n 95% CI"), vjust =0,
             colour = "blue", #fontface = "bold",
-            size = 5)+
+            size = 4.5)+
   geom_segment(data=Tobs,
                aes(x=x1, y = .35,xend = x2,yend =.35),size = .6,
                arrow = arrow(ends = "both", length = unit(0.1,"inches")), 

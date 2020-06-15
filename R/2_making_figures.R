@@ -135,6 +135,8 @@ figure <- annotate_figure(figure,
 figure
 ggsave(filename = "Figures/1_distribution_change.pdf", 
        width = 4, height = 4)
+ggsave(filename = "../../Submission/Thesis_version/1_distribution_change_wide.pdf", 
+       width = 6, height = 4)
 
 # ------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------
@@ -219,7 +221,7 @@ df2 <- data.frame(Date = rep(df$Date,times = 4),
 ggplot(transform(df2,#[df$decade != "1970s",], 
                  decade = factor(decade, levels = c("1970s","1980s","1990s","2000s","2010s")),
                  type = factor(type, levels = c("EWMA", "MVAR", "GARCH", "Nonstochastic"))),
-       aes(x=Date, y= sig))+geom_line(aes(col = type), lwd = .5)+ 
+       aes(x=Date, y= sig^2))+geom_line(aes(col = type), lwd = .5)+ 
   scale_color_manual(values = c("green","red","blue", "magenta"), name = "")+
   guides(color = guide_legend(override.aes = list(size = 1.7)))+
   #geom_line(aes(y = sigTMB), col = "magenta")+
@@ -236,9 +238,11 @@ ggplot(transform(df2,#[df$decade != "1970s",],
     strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
     strip.text = element_text(colour = "white", size = 12))+
   xlab("")+ylab("")
-ggsave("Figures/9_volatility_by_decade.pdf",
+ggsave("Figures/9_volatility_by_decade_kappat.pdf",
        width = 8, height = 8.4)
 
+ggsave("../../Submission/Thesis_version/9_volatility_by_decade_kappat.pdf",
+       width = 8, height = 10)
 
 
 # ----------------------
@@ -252,7 +256,7 @@ ggplot(transform(df,
     strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
     strip.text = element_text(colour = "white", size = 12))+
   xlab("")+ylab("")
-ggsave("Figures/4_Series_by_decade.pdf",
+ggsave("Figures/4_Series_by_decade_kappat.pdf",
        width = 7, height = 7.5)
 
 # ------------------------------------
@@ -268,7 +272,7 @@ ggplot(transform(df,#[df$decade != "1970s",],
         strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
         strip.text = element_text(colour = "white", size = 12))+
   xlab("")+ylab("")
-ggsave("Figures/5_Mean_model_residual_series_by_decade.pdf",
+ggsave("Figures/5_Mean_model_residual_series_by_decade_kappat.pdf",
        width = 7, height = 7.5)
 
 
@@ -391,26 +395,29 @@ z1<-ggarrange(z1a,z1b,z1c,z1d, ncol = 4, widths = c(1.3, 1,1,1))
 ggarrange(z1,z2,z3,ncol = 1,
                   align = "v", labels = c("A","B","C"))
 
-ggsave("Figures/10_Z_acf_by_method.pdf",
+ggsave("Figures/10_Z_acf_by_method_kappat.pdf",
        width = 8, height = 3*2.4)
+ggsave("../../Submission/Thesis_version/10_Z_acf_by_method_kappat.pdf",
+       width = 8, height = 10)
+
 #
 # 4. Coverage table
 #
 L <- cbind(aggregate(df.Z$Z, list(df.Z$type), function(k)mean(abs(k)<=qnorm(p=1-0.05/2))),
            aggregate(df.Z$Z, list(df.Z$type), function(k)mean(dnorm(x=k, log = TRUE)))$x)
 
-Lt <- c(length(which(abs(df.Z$Z[df.Z$type == "Nonstochastic"])<fGarch::qstd(.975, nu = fit$par[1])))/length(data$x),
+Lt <- 100*
+  c(length(which(abs(df.Z$Z[df.Z$type == "Nonstochastic"])<fGarch::qstd(.975, nu = fit$par[1])))/length(data$x),
         length(which(abs(df.Z$Z[df.Z$type == "GARCH"])<fGarch::qstd(.975, nu = fitG$par[1])))/length(data$x),
         length(which(abs(df.Z$Z[df.Z$type == "MVAR"])<fGarch::qstd(.975, nu = MVAR.df)))/length(data$x),
         length(which(abs(df.Z$Z[df.Z$type == "EWMA"])<fGarch::qstd(.975, nu = EWMA.df)))/length(data$x))
+L <- data.frame(
+  Cover = Lt
+)
+rownames(L) <- levels(df.Z$type)
 
-
-names(L)<- c("Model", "Cover", "L/n")
-L$Cover <- paste(round(L$Cover*100, 1),"\\%",sep="")
-L$"L/n" <- round(L$"L/n", 3)
-L <- L[c(4,2,3,1),]
 print(xtable(t(L), digits = 2),
-      file = "Tex/10d_Coverage_table.tex",
+      file = "Tex/10d_Coverage_table_kappat.tex",
       sanitize.text.function = function(k)k,
       include.colnames = FALSE)
 
@@ -453,3 +460,64 @@ ggsave("Figures/7_variance_by_year.pdf", width = 6, height = 2.5)
 
 options(warn = 0)
 
+
+# ------------------------ #
+# -- Figure of kappa(t) -- #
+# ------------------------ #
+Sys.setlocale("LC_TIME", "english") 
+NS.kappa_t = (1+cos(2*pi*((1:365)-h)/365))/2*fit$par[3]
+G.kappa_t = (1+cos(2*pi*((1:365)-h)/365))/2*fitG$par[5]
+kappa.df <- data.frame(
+  date = as.Date(rep(seq(as.Date("1979-01-01"), as.Date("1979-12-31"), 1), 2)),
+  kappa = c(NS.kappa_t, G.kappa_t),#, lincoefs), 
+  type = rep(c("Nonstochastic", "GARCH"#, "movingtrend"
+               ), each = length(NS.kappa_t)) 
+)
+
+ggplot(kappa.df, aes(x = date, y = kappa))+
+  geom_line(aes(col = type))+
+  scale_color_manual(values = c("brown1", "blue", "grey50"))+mytheme+
+  scale_x_date(breaks = "months",date_labels = "%b", name ="")+
+  ylab(expression(kappa[t]))+
+  theme(legend.position = "top", 
+        legend.title = element_blank())+
+  geom_vline(aes(xintercept = as.Date("1979-08-24")), lty =2)+
+  geom_vline(aes(xintercept = as.Date("1979-02-22")), lty =2)
+ggsave("Figures/7_kappa_of_t.pdf", width = 6, height = 3)
+
+
+#-- COVERAGE FIGURES
+df2$degfree <- ifelse(df2$type == "Nonstochastic", fit$par[1], 
+                      ifelse(df2$type == "GARCH", fitG$par[1], 
+                      ifelse(df2$type=="MVAR",MVAR.df,EWMA.df)))
+df2$bands1 <- fGarch::qstd(.975, mean = 0, sd = df2$sig, nu = df2$degfree)
+df2$bands2 <- fGarch::qstd(1-.975, mean = 0, sd = df2$sig, nu = df2$degfree)
+
+
+ggplot(transform(df2,#[df$decade != "1970s",], 
+                 decade = factor(decade, levels = c("1970s","1980s","1990s","2000s","2010s")),
+                 type = factor(type, levels = c("EWMA", "MVAR", "GARCH", "Nonstochastic"))),
+       aes(x=Date))+
+  geom_point(data = df, aes(x=Date, y = abs(x)),col = "skyblue", size = .4)+
+  geom_line(aes(y = bands1, col = type), lwd = .5)+ 
+  #geom_line(aes(y = bands2, col = type), lwd = .5)+ 
+  scale_color_manual(values = c("green","red","blue", "magenta"), name = "")+
+  guides(color = guide_legend(override.aes = list(size = 1.7)))+
+
+  #geom_line(aes(y = sigTMB), col = "magenta")+
+  #geom_line(aes(y = sig), col = "red")+
+  facet_wrap(~decade, scales = "free_x", ncol = 1, strip.position = "right")+mytheme+
+  theme(#strip.placement = "inside",
+    legend.position = "top",
+    plot.margin=unit(x=c(0,0,0,0),units="mm"),
+    legend.box.background = element_rect(fill = "skyblue", colour = "skyblue"),
+    legend.text = element_text(size = 12, colour = "white"),
+    legend.key.width = unit(1,"cm"),
+    legend.margin=margin(-1,0,0,0,"pt"),
+    #legend.box.margin=margin(0,0,0,0),
+    strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
+    strip.text = element_text(colour = "white", size = 12))+
+  xlab("")+ylab("")
+ggsave("Figures/9_t_bands_for_X.pdf", width = 8, height = 8)
+ggsave("../../Submission/Thesis_version/9_t_bands_for_X.pdf",
+       width = 8, height = 10)

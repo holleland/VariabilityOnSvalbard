@@ -3,12 +3,13 @@ library(plyr)
 library(ggplot2)
 
 if(RUN_MC){
+  set.seed(1)
 cores <- detectCores()-1
   # -----------------
   # -- GARCH MODEL --
   # -----------------
   par <- fitG$par
-  init = sd(x[which(mday(data$Date)==1 & month(data$Date)==1)])
+  init = data$rollsd[1]
   run.MC.garch <- function(k, par,Mboot, init){
     n <- nrow(Mboot)
     xboot <-sig <- numeric(n)
@@ -38,10 +39,10 @@ cores <- detectCores()-1
   t2 <- Sys.time()
   (MC.time.garch <- t2-t1)
   MCvar <-apply(MC, 1, mean)
-  save(MCvar, file = "Bootstrap_and_MC_results/MC_1000_conditional_variances_from_GARCH_model.RData")
+  save(MCvar, file = "Bootstrap_and_MC_results/MC_1000_conditional_variances_from_GARCH_model_kappat.RData")
   }
   
-  load("Bootstrap_and_MC_results/MC_1000_conditional_variances_from_GARCH_model.RData")
+  load("Bootstrap_and_MC_results/MC_1000_conditional_variances_from_GARCH_model_kappat.RData")
   
   data$MCsd <- sqrt(MCvar)
 
@@ -70,5 +71,5 @@ cores <- detectCores()-1
           strip.background = element_rect(fill = "skyblue", colour = "skyblue"),
           strip.text = element_text(size = 14, colour = "white")
     )
-  ggsave("Figures/11_Unconditional_Variance_plots.pdf", width = 8, height = 4)
+  ggsave("Figures/11_Unconditional_Variance_plots_kappa.pdf", width = 8, height = 4)
   

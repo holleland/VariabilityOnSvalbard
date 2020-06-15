@@ -26,7 +26,7 @@ for(j in 1:365){
     mytheme+
     scale_color_manual(values = c("blue", "brown1","darkorchid4"),name = "")+
     #scale_fill_manual(values = c("skyblue", "red"),name = "")+
-    scale_y_continuous(limits = c(0,.45), breaks = seq(0,.5,.1))+
+    scale_y_continuous(limits = c(0,.53), breaks = seq(0,.5,.1))+
     xlab("")+ylab("Density")+
     
     theme(legend.position = "bottom",
@@ -41,7 +41,7 @@ for(j in 1:365){
 }
 
 ## 2. Year by year
-dates <- sort(c(seq(as.Date("1976-02-20"), as.Date("2019-02-20"),"year"),
+dates <- sort(c(seq(as.Date("1976-02-22"), as.Date("2019-02-22"),"year"),
                 seq(as.Date("1976-06-05"), as.Date("2019-06-05"),"year")))
 dens.df <- data.frame(
   t = rep(t, 2*length(dates)),
@@ -62,7 +62,7 @@ for(j in 1:44){
     geom_line()+facet_grid(cols = vars(model),rows = vars(year), scales = "fixed")+
     mytheme+
     scale_color_manual(values = c( "blue","brown1","darkorchid4"),name = "")+
-    scale_y_continuous(limits = c(0,.45), breaks = seq(0,.5,0.1))+
+    scale_y_continuous(limits = c(0,.55), breaks = seq(0,.6,0.1))+
     xlab("")+ylab("Density")+
     
     theme(legend.position = "bottom",

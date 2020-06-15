@@ -40,7 +40,7 @@ Type objective_function<Type>::operator() ()
   sigma(0)=sqrt(init*init);
   if(sigma(0) == 0){
     for (int j =0; j < M.row(0).size();j++){
-      sigma(0) += M(0,j) * theta(j);
+      sigma(0) += sqrt(M(0,j) * theta(j));
     }
   }
   determ(0) =sigma(0);

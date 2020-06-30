@@ -149,6 +149,7 @@ ggplot(bootres, aes(x = tobs))+geom_density(fill = "skyblue", alpha = .5)+
                 label = lab), 
             vjust = -.25, hjust = 0.5, parse = TRUE,size = 5,
             col = "blue")+
+  geom_text(aes(x = 0, y = .02, label = "H[0]"), parse=TRUE,color = "white", size =4)+
   geom_segment(data=quants,
                aes(x=q25, y = .44,xend = q75,yend =.44),size = .6,
                arrow = arrow(ends = "both", length = unit(0.1,"inches")), 

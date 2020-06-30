@@ -61,6 +61,9 @@ cores <- detectCores()-1
   )
   df11<-transform(df11, type = factor(type, levels = c("Nonstochastic", "GARCH")))
   ggplot(df11, aes(x = t, y = sigma))+
+    geom_vline(aes(xintercept = as.Date("1979-02-22")), lty = 2)+
+    geom_vline(aes(xintercept = as.Date("1979-08-24")), lty = 2)+
+    
     geom_line(aes(col = factor(year)), size =.5)+facet_wrap(~type)+mytheme+
     scale_x_date(date_breaks = "months", date_labels = "%b", name = "")+
     scale_y_continuous(name = "Variance")+

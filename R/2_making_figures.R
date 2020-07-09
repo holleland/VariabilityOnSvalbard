@@ -160,6 +160,7 @@ svalbardmap <- ggplot() + geom_polygon(data = norway, aes(x=long, y = lat, group
                           axis.ticks=element_blank())
 
 print(svalbardmap)
+ggsave("Figures/2_svalbard_map.png", width=5,height=5)
 ggsave("Figures/2_svalbard_map.pdf", width=5,height=5)
 
 # ------------------------------------

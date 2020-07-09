@@ -64,7 +64,7 @@ Type objective_function<Type>::operator() ()
         sigma(i+1) += beta(j) * sigma(i-j)*sigma(i-j);
       }
     }
-    //if(sigma(i+1)<0) return 999999;
+    if(sigma(i+1)<0) return 9999999;
     sigma(i+1) = sqrt(sigma(i+1));
     f -= (dt(s*x(i+1)/sigma(i+1), v, true) + log(s/sigma(i+1))); 
     }

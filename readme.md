@@ -10,6 +10,12 @@ University of Bergen, Norway.*
 
 *The full paper can be found here (link will come).*
 
+<div style="text-align:center">
+
+<img src="Figures/2_svalbard_map.png" width="500" height="500" />
+
+</div>
+
 This repository contains the necessary code for reproducing results from
 the paper *Decline in Variability on Svalbard*. To run all the code,
 install the necessary packages by the following code:

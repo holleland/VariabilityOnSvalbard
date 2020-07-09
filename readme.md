@@ -1,4 +1,4 @@
-Decline in Variability on Svalbard
+Decline in Temperature Variability on Svalbard
 ================
 
 *Contributors: Sondre Hølleland<sup>†</sup>, Hans Arnfinn Karlsen.

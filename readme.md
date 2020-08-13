@@ -8,7 +8,8 @@ University of Bergen, Norway.*
 
 *Correspondance to: <sondre.holleland@uib.no>*
 
-*The full paper can be found here (link will come).*
+*Journal of Climate paper can be found
+[here](https://journals.ametsoc.org/jcli/article/doi/10.1175/JCLI-D-20-0174.1/353487/Decline-in-temperature-variability-on-Svalbard).*
 
 <div style="text-align:center">
 

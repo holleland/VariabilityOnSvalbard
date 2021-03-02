@@ -9,7 +9,7 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, 
 if(length(new.packages)) install.packages(new.packages)
 
 # If you opened R in the R-folder, set the wd to root: 
-if(!("readme.me" %in% list.files()))
+if(!("readme.md" %in% list.files()))
   setwd("../")
 
 # Fitting the models
